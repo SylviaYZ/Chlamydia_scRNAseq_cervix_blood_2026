@@ -1,0 +1,31 @@
+# cluster markers
+
+library(dplyr)
+library(ggplot2)
+library(Seurat)
+library(scCustomize)
+library(table1)
+library(SingleR)
+
+packageVersion("Seurat")
+# Load data
+cervix.CD4T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker.RDS")
+
+# Check Number of DE genes
+for (r in seq(0.2,2,0.2)){
+  Idents(object = cervix.CD4T.integrated) <- paste0("integrated_snn_res.", r)
+
+  print(paste0("integrated_snn_res.", r ," - number of cells in each cluster:"))
+
+  print(table(cervix.CD4T.integrated@active.ident))
+
+  All.Markers <- FindAllMarkers(cervix.CD4T.integrated, assay = "SCT",  logfc.threshold = 1, base = 2, verbose = FALSE)
+
+  All.Markers <- All.Markers %>% filter(p_val_adj < 0.01)
+
+  print(paste0("integrated_snn_res.", r ," - number of DE genes w/ abs. avg_log2fc > 1 and p_val_adj < 0.01 for each cluster:"))
+
+  print(table(All.Markers$cluster))
+
+  write.csv(All.Markers, file = paste0("Wilcoxon_CD4T_Cluster_Markers_Res_",r,".csv"))
+}
