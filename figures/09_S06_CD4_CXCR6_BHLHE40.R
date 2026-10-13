@@ -1,4 +1,4 @@
-# CD4 CXCR6 and BHLHE40 expression
+# CD4 CXCR6 and BHLHE40 expression for Fig. 9 and Suppl Fig. 6
 
 library(dplyr)
 library(ggplot2)
