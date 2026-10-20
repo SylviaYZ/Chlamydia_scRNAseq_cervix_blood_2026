@@ -55,6 +55,7 @@ format_p <- function(p) {
 # CD4 T cells: participant QC
 # =========================
 # Read metadata before selecting CD4 T cells.
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 obj <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS"
 )
@@ -130,8 +131,9 @@ expression_long$condition <- ret$condition[match(expression_long$participant, re
 # =========================
 # Import original cell-level FindMarkers results exactly; match by gene symbol.
 # The CSV's first unnamed column is the gene row-name column from write.csv.
+# Run cervix/07_differential_expression.R first; it generates this input file.
 sc <- read.csv(
-  "/work/users/s/y/syzhang/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_DE_INFvsUNINF/All_INFvsUNINF/CD4_T_INFvsUNINF_All_Wilcox.csv",
+  "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_DE_INFvsUNINF/All_INFvsUNINF/CD4_T_INFvsUNINF_All_Wilcox.csv",
   row.names = 1, check.names = FALSE, stringsAsFactors = FALSE
 )
 sc$gene <- trimws(rownames(sc))

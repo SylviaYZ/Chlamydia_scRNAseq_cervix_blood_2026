@@ -16,6 +16,7 @@ output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig6/"
 
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS"
 )

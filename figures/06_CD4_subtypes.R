@@ -175,6 +175,7 @@ print(color_palette_E)
 # LOAD SEURAT OBJECT
 # ============================================================
 
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS"
 )
@@ -474,6 +475,7 @@ save_svg(
 # FIGURE 4D — % OF TOTAL CD4
 # ============================================================
 
+# Run cervix/CD4/05_pooled_subtype_composition.R first; it generates this input file.
 Chi2_5celltypes <- read.csv(
   file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_enrichment/Cervix_INFvsUNINF_CD4T_Thelper_Chi2Enrich.csv"
 )
@@ -603,6 +605,7 @@ save_svg(
 # FIGURE 4E — % OF CD4 Th
 # ============================================================
 
+# Run cervix/CD4/06_helper_composition.R first; it generates this input file.
 Chi2_4celltypes <- read.csv(
   file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_enrichment/Cervix_INFvsUNINF_CD4T_Chi2Enrich.csv"
 )

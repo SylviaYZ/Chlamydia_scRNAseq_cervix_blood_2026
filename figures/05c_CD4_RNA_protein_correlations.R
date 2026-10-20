@@ -3,22 +3,18 @@
 library(dplyr)
 library(tidyr)
 library(readr)
-library(readxl)
 library(Seurat)
 library(ggplot2)
 library(stringr)
 
-# ============================ Paths ============================
-BASE <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_major_cytokine"
-if (!dir.exists(BASE)) dir.create(BASE, recursive = TRUE, showWarnings = FALSE)
-
-path_map_cytgene <- file.path(BASE, "Cytokines to Gene Symbols1.xlsx")
-path_cyt         <- file.path(BASE, "all_samples_batch_correct_clean_cytokine.csv")
+# Input supplied in data/; no preceding script is needed. Only the 11 correlation participants retain PTIDs.
+path_cyt <- "data/cytokines_range_adjusted_public.csv"
 
 out_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig3_CD4"
 if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
 # ============================ Read Seurat ============================
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 seu <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS"
 )
@@ -80,42 +76,21 @@ make_plot <- function(dat, xvar, yvar, xlab, ylab, title) {
     )
 }
 
-# ============================ Read mapping for clipping bounds ============================
-map_cytgene <- readxl::read_xlsx(path_map_cytgene)
-cn <- names(map_cytgene)
-
-analyte_col <- cn[grepl("analyte label", cn, ignore.case = TRUE)][1]
-lower_col   <- cn[grepl("lower", cn, ignore.case = TRUE)][1]
-upper_col   <- cn[grepl("upper", cn, ignore.case = TRUE)][1]
-
-if (is.na(lower_col)) lower_col <- cn[3]
-if (is.na(upper_col)) upper_col <- cn[4]
-
-clip_tbl <- map_cytgene %>%
-  transmute(
-    Cytokine  = as.character(.data[[analyte_col]]),
-    lower_lim = suppressWarnings(as.numeric(.data[[lower_col]])),
-    upper_lim = suppressWarnings(as.numeric(.data[[upper_col]]))
-  ) %>%
-  filter(!is.na(Cytokine), Cytokine != "") %>%
-  distinct()
-
-# ============================ Read cytokine data ============================
+# Input supplied in data/cytokines_range_adjusted_public.csv; use its range-adjusted log2 values without clipping again.
 cyt_raw <- read_csv(path_cyt, show_col_types = FALSE)
-id_col  <- names(cyt_raw)[1]
-
 cyt_long <- cyt_raw %>%
-  rename(ID = all_of(id_col)) %>%
-  mutate(ID = gsub("-", "", as.character(ID))) %>%
-  pivot_longer(-ID, names_to = "Cytokine", values_to = "CytokineExpr_log2_raw") %>%
-  filter(!is.na(CytokineExpr_log2_raw)) %>%
-  left_join(clip_tbl, by = "Cytokine") %>%
-  mutate(
-    CytokineExpr = 2^CytokineExpr_log2_raw,
-    CytokineExpr = if_else(!is.na(lower_lim) & CytokineExpr < lower_lim, lower_lim, CytokineExpr),
-    CytokineExpr = if_else(!is.na(upper_lim) & CytokineExpr > upper_lim, upper_lim, CytokineExpr),
-    CytokineExpr_log2_clip = log2(CytokineExpr)
-  )
+  filter(CT == "CT+", !is.na(PTID), nzchar(trimws(PTID))) %>%
+  transmute(
+    ID = gsub("-", "", as.character(PTID)),
+    `BCA.1..15.` = `CXCL13 (BCA1) - Good`,
+    `RANTES..74.` = `CCL5 (RANTES) - Good`,
+    `CXCL9.MIG..47.` = `CXCL9 - Good`,
+    `IP.10..65.` = `CXCL10 (IP-10) - Good`,
+    `CXCL11.I.TAC..19.` = `CXCL11 - Good`
+  ) %>%
+  pivot_longer(-ID, names_to = "Cytokine", values_to = "CytokineExpr_log2_clip") %>%
+  filter(!is.na(CytokineExpr_log2_clip)) %>%
+  mutate(CytokineExpr = 2^CytokineExpr_log2_clip)
 
 bad_pairs <- tibble::tribble(
   ~Cytokine,                  ~ID,
@@ -137,6 +112,7 @@ bca1_dat <- cyt_long %>%
     .groups = "drop"
   )
 
+# Calculate the cytokine average using the original figure-code selection.
 cxcl_avg <- cyt_long %>%
   filter(Cytokine %in% c("CXCL9.MIG..47.", "CXCL10.IP.10..48.", "CXCL11.I.TAC..19.")) %>%
   group_by(ID) %>%

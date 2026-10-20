@@ -30,6 +30,8 @@ packageVersion("Seurat")
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig5/"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
 # ============================================================
 # Final CD4 T-cell color palette
 # ============================================================
@@ -85,6 +87,7 @@ DE.volcano.plot <- function(
   # Load DE results
   # ----------------------------------------------------------
 
+  # Run cervix/CD4/07_pooled_subtype_DE.R first; it generates this input file.
   DE <- read.csv(
     paste0(
       "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_DE_INFvsUNINF/ALL_INFvsUNINF/",
@@ -720,6 +723,7 @@ DE.volcano.plot <- function(
 # Load CD4 object for DE analysis
 # ============================================================
 
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS"
 )
@@ -800,10 +804,12 @@ DE.volcano.plot(
 # Trajectory analysis heatmap
 # ============================================================
 
+# Run cervix/CD4/11_trajectory_condition_DE.R first; it generates this input file.
 sls.model.CD4 <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4_slingshot_tradeSeq_model.RDS"
 )
 
+# Run cervix/CD4/11_trajectory_condition_DE.R first; it generates this input file.
 condRes <- readRDS(
   "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/cervix_CD4lineage_condTest.RDS"
 )
@@ -1296,6 +1302,7 @@ save_svg <- function(
 # Reload Seurat object for trajectory
 # ============================================================
 
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS"
 )

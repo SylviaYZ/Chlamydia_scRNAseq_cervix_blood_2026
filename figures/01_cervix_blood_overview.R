@@ -1,5 +1,8 @@
 # cervix blood overview
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig2", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -17,6 +20,8 @@ library(ragg)
 packageVersion("Seurat")
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig2"
+
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 ###############################################
 # Cervix
@@ -54,6 +59,7 @@ save_svg <- function(plot, file, width_in, height_in, bg = "white") {
   )
 }
 
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 DefaultAssay(object = cervix.integrated) <- "SCT"
@@ -210,6 +216,7 @@ save_svg(
 
 ### Enrichment plot
 
+# Run cervix/06_cell_composition.R first; it generates this input file.
 Chi2_12celltypes <- read.csv(file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_enrichment_analysis/Cervix_major_celltypes/Cervix_INFvsUNINF_12celltypes_Chi2Enrich.csv")
 
 inf_byCelltype_plot <- Chi2_12celltypes %>%
@@ -303,6 +310,7 @@ ggsave("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig2/Fig2C_bar_en
 # blood
 ##############################################
 
+# Run blood/05_annotate_major_cell_types.R first; it generates this input file.
 blood.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 table(blood.integrated$ID, blood.integrated$condition)
 
@@ -501,6 +509,7 @@ ggsave(paste0("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig2/Fig2E
 
 # Enrichment plot
 
+# Run blood/06_cell_composition.R first; it generates this input file.
 Chi2_12celltypes_blood <- read.csv(file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Blood/Blood_majorCT_enrichment_analysis/Blood_INFvsUNINF_4celltypes_Chi2Enrich.csv")
 
 inf_byCelltype_plot_blood <- Chi2_12celltypes_blood %>%

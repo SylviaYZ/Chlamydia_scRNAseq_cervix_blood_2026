@@ -19,8 +19,11 @@ library(ggraph)
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig3/"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
 # DE analysis in cervix
 
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 DefaultAssay(object = cervix.integrated) <- "SCT"
@@ -59,6 +62,7 @@ DE.volcano.plot <- function(ct, title, gene.bold,
   label_pt <- 6
   pt2gg    <- 1/ggplot2::.pt
 
+  # Run cervix/07_differential_expression.R first; it generates this input file.
   DE <- read.csv(paste0("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_DE_INFvsUNINF/All_INFvsUNINF/", ct, "_INFvsUNINF_All_Wilcox.csv"))
 
   DE <- DE %>%

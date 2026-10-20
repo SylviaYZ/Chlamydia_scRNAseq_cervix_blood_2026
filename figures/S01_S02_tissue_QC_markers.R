@@ -11,6 +11,8 @@ library(ragg)
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/SuppFig1"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
 theme_jci <- theme_minimal(base_size = 8, base_family = "Arial") +
   theme(
     panel.grid = element_blank(),
@@ -71,6 +73,7 @@ id_cols_all <- c(
 # =========================================================
 # Cervix
 # =========================================================
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS"
 )
@@ -194,13 +197,13 @@ Cervix_p4 <- DimPlot(
 
 save_svg(
   Cervix_p1,
-  file.path(output_dir, "SuppFig1A_UMAP_ID.svg"),
+  file.path(output_dir, "SuppFig1B_UMAP_ID.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   Cervix_p2,
-  file.path(output_dir, "SuppFig1B_UMAP_Original_Ident.svg"),
+  file.path(output_dir, "SuppFig1A_UMAP_Original_Ident.svg"),
   width_in = 3, height_in = 2
 )
 
@@ -267,6 +270,7 @@ ggplot2::ggsave(
 # =========================================================
 # Blood
 # =========================================================
+# Run blood/05_annotate_major_cell_types.R first; it generates this input file.
 blood.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS"
 )
@@ -416,13 +420,13 @@ Blood_p4 <- DimPlot(
 
 save_svg(
   Blood_p1,
-  file.path(output_dir, "SuppFig2A_UMAP_ID.svg"),
+  file.path(output_dir, "SuppFig2B_UMAP_ID.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   Blood_p2,
-  file.path(output_dir, "SuppFig2B_UMAP_Original_Ident.svg"),
+  file.path(output_dir, "SuppFig2A_UMAP_Original_Ident.svg"),
   width_in = 3, height_in = 2
 )
 

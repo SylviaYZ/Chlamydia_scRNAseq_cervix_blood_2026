@@ -24,6 +24,8 @@ packageVersion("Seurat")
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig9/"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
 default_cols <- hue_pal()(4)
 color_palette  <- c(default_cols[1], "#39B600", "#D89000", default_cols[4])
 
@@ -52,6 +54,7 @@ DE.volcano.plot <- function(ct, title, gene.bold,
   label_pt <- 6
   pt2gg    <- 1/ggplot2::.pt
 
+  # Run cervix/CD8/05_subtype_DE.R first; it generates this input file.
   DE <- read.csv(paste0("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_DE_INFvsUNINF/ALL_INFvsUNINF/",ct,"_INFvsUNINF_All_Wilcox.csv"))
 
   DE <- DE %>%
@@ -289,6 +292,7 @@ DE.volcano.plot <- function(ct, title, gene.bold,
   }
 }
 
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 enrich_category <- list("Naive CD8 T cells" = c("The NLRP3 inflammasome", "RIP-mediated NFkB activation via ZBP1",

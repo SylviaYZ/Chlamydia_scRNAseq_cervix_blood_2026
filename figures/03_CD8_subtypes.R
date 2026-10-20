@@ -24,6 +24,8 @@ packageVersion("Seurat")
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig8"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
 default_cols <- hue_pal()(4)
 color_palette  <- c(default_cols[1], "#39B600", "#D89000", default_cols[4])
 
@@ -52,6 +54,7 @@ save_svg <- function(plot, file, width_in, height_in, bg = "white") {
   )
 }
 
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 cervix.CD8T.integrated$condition <- factor(cervix.CD8T.integrated$condition,
@@ -187,6 +190,7 @@ save_svg(
 )
 
 # Heatmap for enrichment
+# Run cervix/CD8/04_subtype_composition.R first; it generates this input file.
 Chi2_12celltypes <- read.csv(file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_Enrichment/Cervix_INFvsUNINF_CD8T_SingleR_Chi2Enrich.csv")
 
 inf_byCelltype_plot <- Chi2_12celltypes %>%

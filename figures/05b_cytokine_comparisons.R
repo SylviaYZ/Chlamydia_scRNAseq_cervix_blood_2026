@@ -1,5 +1,8 @@
 #  cytokine comparisons
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -7,6 +10,7 @@ library(ggbeeswarm)
 library(ggpubr)
 library(stringr)
 
+# Run figures/05a_prepare_cytokine_table.R first; it generates this input file.
 goodcytokines <- read.csv("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/Fig3_CD4/Cervix_Cytokines/cleandata/goodcytokines_rangeapplied_KY.csv")
 
 # analytes to keep
@@ -43,8 +47,9 @@ goodcytokines_long <- goodcytokines %>%
       TRUE ~ NA_character_
     )
   ) %>%
-  filter(!is.na(Analyte_base)) %>%
-  distinct(PTID, CT, Analyte, log2_value, Analyte_clean, Analyte_base)
+  filter(!is.na(Analyte_base))
+
+# Keep every participant row: blank public PTIDs must not be deduplicated.
 
 # make one figure per analyte
 for (a in analytes_keep) {

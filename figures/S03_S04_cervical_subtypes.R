@@ -1,4 +1,4 @@
-#  S04 cervical subtypes
+# Supplementary Figures 3–4: cervical CD8 and CD4 subsets
 
 library(dplyr)
 library(ggplot2)
@@ -20,6 +20,8 @@ library(forcats)
 packageVersion("Seurat")
 
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/SuppFig3"
+
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 font_family <- "Arial"
 
@@ -74,8 +76,9 @@ id_cols_all <- c(
   "NA" = "grey75"
 )
 
+# Run figures/S01_S02_tissue_QC_markers.R first; it generates this input file.
 ID_mask <- read_xlsx(
-  "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/SuppFig3/Combined_ID_Mask_Convert.xlsx"
+  "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Figures/SuppFig1/Combined_ID_Mask_Convert.xlsx"
 )
 
 # helper to make explicit ID plotting factor
@@ -90,6 +93,7 @@ make_id_plot_factor <- function(x) {
 # =========================
 # CD4 T cells
 # =========================
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS"
 )
@@ -171,25 +175,26 @@ CD4_p3 <- DimPlot(
 
 save_svg(
   CD4_p1,
-  file.path(output_dir, "SuppFig3A_UMAP_ID.svg"),
+  file.path(output_dir, "SuppFig4B_UMAP_ID.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   CD4_p2,
-  file.path(output_dir, "SuppFig3B_UMAP_Original_Ident.svg"),
+  file.path(output_dir, "SuppFig4A_UMAP_Original_Ident.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   CD4_p3,
-  file.path(output_dir, "SuppFig3C_UMAP_Original_condition.svg"),
+  file.path(output_dir, "SuppFig4C_UMAP_Original_condition.svg"),
   width_in = 3, height_in = 2
 )
 
 # =========================
 # CD8 T cells
 # =========================
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS(
   "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS"
 )
@@ -271,18 +276,18 @@ CD8_p3 <- DimPlot(
 
 save_svg(
   CD8_p1,
-  file.path(output_dir, "SuppFig4A_UMAP_ID.svg"),
+  file.path(output_dir, "SuppFig3B_UMAP_ID.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   CD8_p2,
-  file.path(output_dir, "SuppFig4B_UMAP_Original_Ident.svg"),
+  file.path(output_dir, "SuppFig3A_UMAP_Original_Ident.svg"),
   width_in = 3, height_in = 2
 )
 
 save_svg(
   CD8_p3,
-  file.path(output_dir, "SuppFig4C_UMAP_Original_condition.svg"),
+  file.path(output_dir, "SuppFig3C_UMAP_Original_condition.svg"),
   width_in = 3, height_in = 2
 )
