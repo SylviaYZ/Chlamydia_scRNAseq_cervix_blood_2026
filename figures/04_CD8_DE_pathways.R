@@ -1,4 +1,4 @@
-# CD8 DE pathways
+# CD8 DE, pathways and trajectory
 
 library(dplyr)
 library(ggplot2)
@@ -322,3 +322,164 @@ DE.volcano.plot(ct = "Terminal effector CD8 T cells",
                 gene.bold =  NA,
                 net.plot = TRUE)
 
+# CD8 trajectory UMAP and heatmap
+library(SingleCellExperiment)
+
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this annotated CD8 object.
+cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
+
+# Run cervix/CD8/07_trajectory_condition_DE.R first; it saves the model, condition test and gene clusters below.
+sls.model.CD8 <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8_slingshot_tradeSeq_model.RDS")
+trajectory_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR"
+condRes <- readRDS(file.path(trajectory_dir, "cervix_CD8lineage_condTest.RDS"))
+infected.DE.Traj.cluster.df <- readRDS(file.path(trajectory_dir, "infected_DE_Traj_cluster.RDS"))
+
+# Recreate the original PCA-based Slingshot curve and project it onto the saved UMAP.
+DefaultAssay(cervix.CD8T.integrated) <- "SCT"
+cervix.CD8T.integrated.SCE <- as.SingleCellExperiment(cervix.CD8T.integrated, assay = "SCT")
+reducedDim(cervix.CD8T.integrated.SCE, "umap") <- Embeddings(cervix.CD8T.integrated, "umap")
+reducedDim(cervix.CD8T.integrated.SCE, "pca") <- Embeddings(cervix.CD8T.integrated, "pca")
+
+cervix.CD8T.integrated.SCE <- slingshot(
+  cervix.CD8T.integrated.SCE,
+  reducedDim = "pca",
+  clusterLabels = colData(cervix.CD8T.integrated.SCE)$SingleR.pruned,
+  start.clus = "Naive CD8 T cells"
+)
+cervix.CD8T.embed <- embedCurves(
+  cervix.CD8T.integrated.SCE,
+  reducedDim(cervix.CD8T.integrated.SCE, "umap")
+)
+cervix.CD8T.curve <- slingCurves(cervix.CD8T.embed, as.df = TRUE)
+colnames(cervix.CD8T.curve)[1:2] <- c("umap_1", "umap_2")
+
+df.CD8 <- as.data.frame(Embeddings(cervix.CD8T.integrated, "umap")[, 1:2])
+colnames(df.CD8) <- c("umap_1", "umap_2")
+df.CD8$SingleR.pruned <- factor(
+  cervix.CD8T.integrated$SingleR.pruned,
+  levels = c("Naive CD8 T cells", "Central memory CD8 T cells",
+             "Effector memory CD8 T cells", "Terminal effector CD8 T cells"),
+  labels = c("TN", "TCM", "TEM", "TTE")
+)
+stopifnot(!anyNA(df.CD8$SingleR.pruned))
+
+# Use the same subtype colors and labels as the CD8 figures.
+trajectory_colors <- c(TN = "#F8766D", TCM = "#39B600",
+                       TEM = "#D89000", TTE = "#C77CFF")
+xr <- range(df.CD8$umap_1)
+yr <- range(df.CD8$umap_2)
+stubx <- diff(xr) * 0.06
+stuby <- diff(yr) * 0.06
+
+plot_traj <- ggplot(df.CD8, aes(umap_1, umap_2)) +
+  geom_point(aes(color = SingleR.pruned), size = 0.001) +
+  scale_color_manual(values = trajectory_colors, drop = FALSE) +
+  theme_jci +
+  coord_fixed(1, clip = "off") +
+  theme(
+    axis.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = margin(2, 2, 2, 2),
+    legend.position = "right",
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.key.size = grid::unit(0.22, "cm"),
+    legend.text = element_text(size = 8)
+  ) +
+  annotate("segment", x = xr[1], xend = xr[1] + stubx,
+           y = yr[1], yend = yr[1], linewidth = 0.3) +
+  annotate("segment", x = xr[1], xend = xr[1],
+           y = yr[1], yend = yr[1] + stuby, linewidth = 0.3) +
+  annotate("text", x = xr[1] + stubx * 1.1, y = yr[1] - stuby * 0.25,
+           label = "UMAP_1", size = 7 / ggplot2::.pt) +
+  annotate("text", x = xr[1] - stubx * 0.25, y = yr[1] + stuby * 1.1,
+           label = "UMAP_2", angle = 90, vjust = 0, size = 7 / ggplot2::.pt) +
+  geom_path(
+    data = cervix.CD8T.curve %>% arrange(Order),
+    aes(x = umap_1, y = umap_2, group = Lineage),
+    inherit.aes = FALSE
+  ) +
+  guides(color = guide_legend(title = NULL, override.aes = list(size = 3)))
+
+ggsave(file.path(output_dir, "Fig4G_UMAP_trajectory.svg"), plot_traj,
+       device = svglite::svglite, width = 3, height = 3, units = "in",
+       bg = "white", limitsize = FALSE)
+
+# Keep the original condition-test cutoff, 50 points and row-wise scaling.
+condRes <- condRes %>% filter(padj < 0.05) %>% arrange(padj)
+stopifnot(nrow(condRes) > 0,
+          !anyDuplicated(infected.DE.Traj.cluster.df$gene),
+          setequal(rownames(condRes), infected.DE.Traj.cluster.df$gene))
+
+# The original model orders CT+ first and CT- second; check before splitting columns.
+condition_levels <- levels(colData(sls.model.CD8)$tradeSeq$conditions)
+if (!identical(condition_levels, c("infected", "uninfected"))) {
+  stop("Expected model condition levels: infected, uninfected. Check the saved CD8 model.")
+}
+yhatSmooth2 <- predictSmooth(
+  sls.model.CD8, gene = rownames(condRes), nPoints = 50, tidy = FALSE
+)
+if (ncol(yhatSmooth2) != 100L) {
+  stop("Expected one CD8 lineage with 50 points for each of the two conditions.")
+}
+yhatSmooth2Scaled <- t(scale(t(yhatSmooth2)))
+if (any(!is.finite(yhatSmooth2Scaled))) {
+  stop("Non-finite scaled predictions; check the saved model and significant genes.")
+}
+
+# Reuse the five gene clusters saved by the analysis; match the original CD8 figure order.
+make_trajectory_heatmap <- function(columns, title) {
+  plot_data <- as.data.frame(yhatSmooth2Scaled[, columns, drop = FALSE])
+  colnames(plot_data) <- as.character(1:50)
+  plot_data$gene <- rownames(plot_data)
+  plot_data <- plot_data %>%
+    pivot_longer(-gene, names_to = "pseudotime", values_to = "scaled_predicted_expression") %>%
+    mutate(pseudotime = as.numeric(pseudotime)) %>%
+    left_join(infected.DE.Traj.cluster.df, by = "gene") %>%
+    mutate(cluster = factor(cluster, levels = c(4, 1, 3, 5, 2)))
+  stopifnot(!anyNA(plot_data$cluster))
+
+  ggplot(plot_data, aes(pseudotime, gene, fill = scaled_predicted_expression)) +
+    geom_tile() +
+    scale_fill_gradient2(
+      name = "Predicted\nExpression",
+      low = "blue", mid = "white", high = "red",
+      midpoint = 0, limits = c(-3, 7)
+    ) +
+    facet_grid(rows = vars(cluster), space = "free", scales = "free") +
+    labs(title = title) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      axis.title.x = element_text(size = 8),
+      axis.title.y = element_text(size = 8),
+      plot.title = element_text(size = 8),
+      legend.position = "bottom",
+      legend.title = element_text(size = 7),
+      legend.text = element_text(size = 6),
+      legend.box.margin = margin(2, 0, 2, 0),
+      legend.margin = margin(0, 0, 0, 0),
+      legend.spacing.x = grid::unit(2, "mm"),
+      legend.spacing.y = grid::unit(2, "mm")
+    ) +
+    guides(fill = guide_colorbar(
+      direction = "horizontal", title.position = "left",
+      barheight = grid::unit(3, "mm"), barwidth = grid::unit(17, "mm"),
+      ticks = FALSE
+    ))
+}
+
+infected_heatmap_plot <- make_trajectory_heatmap(1:50, "   CT+")
+uninfected_heatmap_plot <- make_trajectory_heatmap(51:100, "   CT-") +
+  theme(plot.title = element_text(face = "bold"))
+p_save <- ggarrange(
+  uninfected_heatmap_plot, infected_heatmap_plot,
+  ncol = 2, common.legend = TRUE, legend = "bottom"
+)
+
+ggsave(file.path(output_dir, "Fig4H_trajectory_heatmap.svg"), p_save,
+       device = svglite::svglite, width = 3, height = 3, units = "in",
+       bg = "white", limitsize = FALSE)
+ggsave(file.path(output_dir, "Fig4H_trajectory_heatmap.tiff"), p_save,
+       width = 8, height = 5, units = "in", dpi = 600)
