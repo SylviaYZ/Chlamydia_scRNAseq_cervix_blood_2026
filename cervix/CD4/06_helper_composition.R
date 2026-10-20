@@ -1,5 +1,8 @@
 # helper composition
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_enrichment", recursive = TRUE, showWarnings = FALSE)
+
 library(Seurat)
 library(ggplot2)
 library(dplyr)
@@ -11,6 +14,7 @@ library(cowplot)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS")
 
 cervix.CD4T.integrated<- cervix.CD4T.integrated[, cervix.CD4T.integrated$SingleR.pruned.aggregated == "T-helper cells"]
@@ -57,7 +61,7 @@ Chi2_CD4T <- Chi2_CD4T %>% select(cell_type, InCluster_infected,
 
 Chi2_CD4T
 
-write.csv(Chi2_CD4T, file = "Cervix_INFvsUNINF_CD4T_Chi2Enrich.csv")
+write.csv(Chi2_CD4T, file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_enrichment/Cervix_INFvsUNINF_CD4T_Chi2Enrich.csv")
 
 ## Proporiton INF vs UNINF within each cell type visualization
 inf_byCelltype_plot <- Chi2_CD4T %>%

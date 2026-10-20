@@ -1,4 +1,8 @@
 # collectri viper inference
+# Supplementary Table 5: generates TF activity scores used by cervix/11_export_TF_gene_table.R.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_major_TF_VIPER", recursive = TRUE, showWarnings = FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -22,6 +26,7 @@ packageVersion("Seurat")
 # Load data
 ##################################
 
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 DefaultAssay(object = cervix.integrated) <- "SCT"
@@ -34,6 +39,7 @@ Idents(cervix.integrated) <- "major_celltypes"
 # Load CollecTRI network
 ##################################
 
+# External CollecTRI reference retrieved by decoupleR; no preceding repository script generates it.
 net <- get_collectri(organism='human', split_complexes=FALSE)
 
 mat <- as.matrix(cervix.integrated@assays[["SCT"]]@data)

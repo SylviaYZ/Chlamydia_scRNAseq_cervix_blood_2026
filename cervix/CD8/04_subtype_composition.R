@@ -1,5 +1,8 @@
 # subtype composition
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_Enrichment", recursive = TRUE, showWarnings = FALSE)
+
 library(Seurat)
 library(ggplot2)
 library(dplyr)
@@ -11,6 +14,7 @@ library(cowplot)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 # Observed cell counts
@@ -55,7 +59,7 @@ Chi2_CD8T <- Chi2_CD8T %>% dplyr::select(cell_type, InCluster_infected,
 
 Chi2_CD8T
 
-write.csv(Chi2_CD8T, file = "Cervix_INFvsUNINF_CD8T_SingleR_Chi2Enrich.csv")
+write.csv(Chi2_CD8T, file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_Enrichment/Cervix_INFvsUNINF_CD8T_SingleR_Chi2Enrich.csv")
 
 ## Proporiton INF vs UNINF within each cell type visualization
 inf_byCelltype_plot <- Chi2_CD8T %>%

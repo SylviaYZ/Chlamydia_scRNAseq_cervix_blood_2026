@@ -1,4 +1,4 @@
-# export trajectory gene table
+# Export CD8 trajectory genes and pathways for Supplementary Table 8
 
 library(dplyr)
 library(openxlsx)
@@ -8,13 +8,13 @@ library(ReactomePA)
 
 select <- dplyr::select
 
-# -----------------------------
 # Read differential expression output
-# -----------------------------
+# Run cervix/CD8/07_trajectory_condition_DE.R first; it generates this input file.
 gene_output <- readRDS(
   "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR/infected_DE_Traj_cluster.RDS"
 )
 
+# Run cervix/CD8/07_trajectory_condition_DE.R first; it generates this input file.
 gene_pval <- readRDS(
   "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR/cervix_CD8lineage_condTest.RDS"
 )
@@ -30,9 +30,7 @@ gene_output <- dplyr::left_join(
 head(gene_output)
 colnames(gene_output)
 
-# -----------------------------
 # Reorder / relabel clusters
-# -----------------------------
 gene_output$cluster_update <- dplyr::case_when(
   gene_output$cluster == 4 ~ 1,
   gene_output$cluster == 1 ~ 2,
@@ -42,9 +40,7 @@ gene_output$cluster_update <- dplyr::case_when(
   TRUE ~ NA_real_
 )
 
-# -----------------------------
 # Check required columns
-# -----------------------------
 required_cols <- c("gene", "waldStat", "df", "pvalue", "padj", "cluster_update")
 
 missing_cols <- setdiff(required_cols, colnames(gene_output))
@@ -58,9 +54,7 @@ if (length(missing_cols) > 0) {
   )
 }
 
-# -----------------------------
 # Helper functions
-# -----------------------------
 
 # Valid Excel sheet names
 sanitize_sheet <- function(x) {
@@ -82,18 +76,17 @@ format_pval <- function(x, digits = 3) {
   )
 }
 
-# -----------------------------
 # Output paths
-# -----------------------------
 output_dir <- "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR"
 
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Supplementary Table 8: trajectory genes by expression module.
 de_output_file <- file.path(output_dir, "DE_by_cluster_results.xlsx")
 
 reactome_dir <- output_dir
 
-# -----------------------------
 # Create DE Excel workbook
-# -----------------------------
 wb <- createWorkbook()
 
 # Keep only rows with non-NA cluster_update
@@ -119,14 +112,12 @@ footnote_style <- createStyle(
   wrapText = TRUE
 )
 
-# -----------------------------
 # Loop over clusters and write DE tables
-# -----------------------------
 for (cl in sort(unique(df$cluster_update))) {
-
+  
   sheet_name <- paste0("cluster_", sanitize_sheet(cl))
   addWorksheet(wb, sheet_name)
-
+  
   out <- df %>%
     dplyr::filter(.data$cluster_update == cl) %>%
     dplyr::arrange(.data$padj) %>%
@@ -135,7 +126,7 @@ for (cl in sort(unique(df$cluster_update))) {
       pvalue = format_pval(.data$pvalue),
       padj = format_pval(.data$padj)
     )
-
+  
   colnames(out) <- c(
     "Gene",
     "Wald statistic",
@@ -143,7 +134,7 @@ for (cl in sort(unique(df$cluster_update))) {
     "Nominal p-value",
     "Adjusted p-value"
   )
-
+  
   writeData(
     wb,
     sheet = sheet_name,
@@ -151,7 +142,7 @@ for (cl in sort(unique(df$cluster_update))) {
     startRow = 1,
     startCol = 1
   )
-
+  
   # Header formatting
   addStyle(
     wb,
@@ -161,10 +152,10 @@ for (cl in sort(unique(df$cluster_update))) {
     cols = 1:ncol(out),
     gridExpand = TRUE
   )
-
+  
   # Apply number/text formatting only if table has rows
   if (nrow(out) > 0) {
-
+    
     # Wald statistic
     addStyle(
       wb,
@@ -174,7 +165,7 @@ for (cl in sort(unique(df$cluster_update))) {
       cols = which(colnames(out) %in% c("Wald statistic")),
       gridExpand = TRUE
     )
-
+    
     # Degrees of freedom
     addStyle(
       wb,
@@ -184,7 +175,7 @@ for (cl in sort(unique(df$cluster_update))) {
       cols = which(colnames(out) %in% c("Degrees of freedom")),
       gridExpand = TRUE
     )
-
+    
     # P-values are text because zero values are displayed as <1E-16
     addStyle(
       wb,
@@ -195,10 +186,10 @@ for (cl in sort(unique(df$cluster_update))) {
       gridExpand = TRUE
     )
   }
-
+  
   # Add table footnote
   footnote_row <- nrow(out) + 3
-
+  
   footnote_text <- paste(
     "Footnote:",
     "P-values reported as <1E-16 were stored as 0 due to numerical precision limits in the tradeSeq Wald test p-value calculation",
@@ -208,7 +199,7 @@ for (cl in sort(unique(df$cluster_update))) {
     "Nominal p-value is the unadjusted p-value;",
     "Adjusted p-value is the Benjamini-Hochberg adjusted p-value."
   )
-
+  
   writeData(
     wb,
     sheet = sheet_name,
@@ -216,14 +207,14 @@ for (cl in sort(unique(df$cluster_update))) {
     startRow = footnote_row,
     startCol = 1
   )
-
+  
   mergeCells(
     wb,
     sheet = sheet_name,
     cols = 1:ncol(out),
     rows = footnote_row
   )
-
+  
   addStyle(
     wb,
     sheet = sheet_name,
@@ -232,7 +223,7 @@ for (cl in sort(unique(df$cluster_update))) {
     cols = 1,
     gridExpand = TRUE
   )
-
+  
   # Improve readability
   setColWidths(
     wb,
@@ -240,7 +231,7 @@ for (cl in sort(unique(df$cluster_update))) {
     cols = 1:ncol(out),
     widths = "auto"
   )
-
+  
   freezePane(
     wb,
     sheet = sheet_name,
@@ -254,3 +245,229 @@ saveWorkbook(
   file = de_output_file,
   overwrite = TRUE
 )
+
+# Reactome pathway enrichment analysis
+# Supplementary Table 8: REACTOME pathways for the same trajectory modules.
+for (c in 1:5) {
+  
+  All.DE <- gene_output %>%
+    dplyr::filter(.data$cluster_update == c)
+  
+  print(paste0("All DE genes in cluster ", c, ": "))
+  print(sort(All.DE[["gene"]]))
+  
+  # SYMBOL to ENTREZID mapping
+  DE.Entrez.SYMBOL <- bitr(
+    All.DE[["gene"]],
+    fromType = "SYMBOL",
+    toType = "ENTREZID",
+    OrgDb = org.Hs.eg.db
+  )
+  
+  if (is.null(DE.Entrez.SYMBOL) || nrow(DE.Entrez.SYMBOL) == 0) {
+    DE.Entrez.SYMBOL <- data.frame(
+      SYMBOL = character(),
+      ENTREZID = character()
+    )
+  }
+  
+  DE.Entrez.SYMBOL <- DE.Entrez.SYMBOL %>%
+    dplyr::mutate(
+      Mapping = "SYMBOL",
+      USE = 1 * !duplicated(.data$SYMBOL)
+    )
+  
+  # ALIAS to ENTREZID mapping for genes not mapped by SYMBOL
+  genes_not_mapped_by_symbol <- All.DE[["gene"]][
+    !All.DE[["gene"]] %in% DE.Entrez.SYMBOL$SYMBOL
+  ]
+  
+  if (length(genes_not_mapped_by_symbol) > 0) {
+    
+    DE.Entrez.ALIAS <- bitr(
+      genes_not_mapped_by_symbol,
+      fromType = "ALIAS",
+      toType = "ENTREZID",
+      OrgDb = org.Hs.eg.db
+    )
+    
+    if (is.null(DE.Entrez.ALIAS) || nrow(DE.Entrez.ALIAS) == 0) {
+      DE.Entrez.ALIAS <- data.frame(
+        SYMBOL = character(),
+        ENTREZID = character(),
+        Mapping = character(),
+        USE = numeric()
+      )
+    } else {
+      DE.Entrez.ALIAS <- DE.Entrez.ALIAS %>%
+        dplyr::mutate(
+          SYMBOL = .data$ALIAS,
+          Mapping = "ALIAS",
+          USE = 1 * !duplicated(.data$SYMBOL)
+        ) %>%
+        dplyr::select(dplyr::all_of(c("SYMBOL", "ENTREZID", "Mapping", "USE")))
+    }
+    
+  } else {
+    
+    DE.Entrez.ALIAS <- data.frame(
+      SYMBOL = character(),
+      ENTREZID = character(),
+      Mapping = character(),
+      USE = numeric()
+    )
+  }
+  
+  DE.Entrez <- rbind(
+    DE.Entrez.SYMBOL %>%
+      dplyr::select(dplyr::all_of(c("SYMBOL", "ENTREZID", "Mapping", "USE"))),
+    DE.Entrez.ALIAS
+  )
+  
+  print("DE genes that do not have Entrez ID:")
+  print(sort(All.DE[["gene"]][!All.DE[["gene"]] %in% DE.Entrez$SYMBOL]))
+  
+  # Keep unique genes only
+  DE.Entrez.use <- DE.Entrez %>%
+    dplyr::filter(.data$USE == 1)
+  
+  # Run enrichment only if there are mapped genes
+  if (nrow(DE.Entrez.use) > 0) {
+    
+    enrichedP <- enrichPathway(
+      gene = DE.Entrez.use$ENTREZID[order(DE.Entrez.use$SYMBOL)],
+      pvalueCutoff = 0.1,
+      pAdjustMethod = "BH",
+      readable = TRUE
+    )
+    
+    reactome_out <- as.data.frame(enrichedP@result)
+    
+    if (nrow(reactome_out) > 0) {
+      
+      reactome_out <- reactome_out %>%
+        dplyr::select(dplyr::all_of(c(
+          "ID",
+          "Description",
+          "GeneRatio",
+          "BgRatio",
+          "p.adjust",
+          "geneID"
+        ))) %>%
+        dplyr::filter(.data$p.adjust < 0.05) %>%
+        dplyr::mutate(
+          p.adjust = format_pval(.data$p.adjust)
+        )
+      
+    } else {
+      
+      reactome_out <- data.frame(
+        ID = character(),
+        Description = character(),
+        GeneRatio = character(),
+        BgRatio = character(),
+        p.adjust = character(),
+        geneID = character()
+      )
+    }
+    
+  } else {
+    
+    reactome_out <- data.frame(
+      ID = character(),
+      Description = character(),
+      GeneRatio = character(),
+      BgRatio = character(),
+      p.adjust = character(),
+      geneID = character()
+    )
+  }
+  
+  # Write Reactome output using openxlsx
+  reactome_file <- file.path(
+    reactome_dir,
+    paste0("CD8T_trajectory_geneCluster", c, ".xlsx")
+  )
+  
+  wb_reactome <- createWorkbook()
+  addWorksheet(wb_reactome, "Reactome_pathway")
+  
+  writeData(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    x = reactome_out
+  )
+  
+  addStyle(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    style = header_style,
+    rows = 1,
+    cols = 1:ncol(reactome_out),
+    gridExpand = TRUE
+  )
+  
+  if (nrow(reactome_out) > 0) {
+    addStyle(
+      wb_reactome,
+      sheet = "Reactome_pathway",
+      style = text_style,
+      rows = 2:(nrow(reactome_out) + 1),
+      cols = which(colnames(reactome_out) %in% c("p.adjust")),
+      gridExpand = TRUE
+    )
+  }
+  
+  # Add Reactome footnote
+  reactome_footnote_row <- nrow(reactome_out) + 3
+  
+  reactome_footnote_text <- paste(
+    "Footnote:",
+    "p.adjust indicates the Benjamini-Hochberg adjusted p-value from Reactome pathway enrichment analysis.",
+    "Adjusted p-values reported as <1E-16 were stored as 0 due to numerical precision limits and should be interpreted as smaller than 1 × 10^-16, not as true zero."
+  )
+  
+  writeData(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    x = reactome_footnote_text,
+    startRow = reactome_footnote_row,
+    startCol = 1
+  )
+  
+  mergeCells(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    cols = 1:ncol(reactome_out),
+    rows = reactome_footnote_row
+  )
+  
+  addStyle(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    style = footnote_style,
+    rows = reactome_footnote_row,
+    cols = 1,
+    gridExpand = TRUE
+  )
+  
+  setColWidths(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    cols = 1:ncol(reactome_out),
+    widths = "auto"
+  )
+  
+  freezePane(
+    wb_reactome,
+    sheet = "Reactome_pathway",
+    firstActiveRow = 2
+  )
+  
+  saveWorkbook(
+    wb_reactome,
+    file = reactome_file,
+    overwrite = TRUE
+  )
+}
+

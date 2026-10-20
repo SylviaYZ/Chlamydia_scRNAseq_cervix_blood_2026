@@ -1,5 +1,8 @@
 # subset normalize integrate
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -7,6 +10,7 @@ library(scCustomize)
 library(table1)
 packageVersion("Seurat")
 # Load data and select CD8 T
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 cervix.CD8T <- cervix.integrated[,cervix.integrated$major_celltypes== "CD8_T"]

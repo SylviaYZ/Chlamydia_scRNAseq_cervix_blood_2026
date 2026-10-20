@@ -1,5 +1,8 @@
 # TF activity comparison
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_major_TF_VIPER/TF_VIPER_Seurat", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -15,6 +18,7 @@ library(purrr)
 library(viper)
 library(Matrix)
 
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 DefaultAssay(object = cervix.integrated) <- "SCT"
@@ -23,6 +27,7 @@ cervix.integrated$major_celltypes[which(cervix.integrated$major_celltypes%in% c(
 
 Idents(cervix.integrated) <- "major_celltypes"
 
+# Run cervix/09_collectri_viper_inference.R first; it generates this input file.
 acts <- readRDS(file="/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_major_TF_VIPER/Cervix_major_TF_VIPER.rds")
 
 cols <- colnames(cervix.integrated)
@@ -72,6 +77,7 @@ markers_by_ct <- lapply(cts, function(ct) {
     mutate(celltype = ct)
 }) %>% bind_rows()
 
+# Supplementary Table 5 workbook is exported by cervix/11_export_TF_gene_table.R; selected CSVs here supply STRING.
 saveRDS(markers_by_ct, "markers_viper_by_celltype.rds")
 
 CD4 <- markers_by_ct %>% filter(celltype == "CD4_T")

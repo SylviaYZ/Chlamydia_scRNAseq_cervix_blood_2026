@@ -1,4 +1,10 @@
 # trajectory condition DE
+# Supplementary Table 11: generates trajectory DE and gene-module results; cervix/CD4/12_export_trajectory_gene_table.R exports the tables.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/Visualization", recursive = TRUE, showWarnings = FALSE)
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper", recursive = TRUE, showWarnings = FALSE)
 
 library(Seurat)
 library(ggplot2)
@@ -15,6 +21,7 @@ library(tidyr)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD4/04_pool_helper_subtypes.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR_manual.RDS")
 
 table(cervix.CD4T.integrated$SingleR.pruned.aggregated, cervix.CD4T.integrated$ID)
@@ -114,6 +121,7 @@ plot(Trajectory.annotation)
 # DE analysis using TradeSeq
 ## Remove MT and RB genes, and AC genes
 
+# Run cervix/07_differential_expression.R first; it generates this input file.
 genes.remove <- readRDS(file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Gene_Remove_DE.rds")
 
 # Remove long integrative non-coding genes
@@ -121,14 +129,12 @@ cervix.CD4T.integrated.SCE.DE <- cervix.CD4T.integrated.SCE[!rownames(cervix.CD4
 
 cervix.CD4T.integrated.SCE.DE
 ## select knots for model
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 set.seed(1249)
 
 knots <- evaluateK(counts = assays(cervix.CD4T.integrated.SCE.DE)$counts, sds = cervix.CD4T.embed, k = 3:10,
                    nGenes = 500, verbose = T)
 
 ## Fit the model
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 set.seed(1249)
 sls.model.CD4 <- fitGAM(counts = assays(cervix.CD4T.integrated.SCE.DE)$counts, sds = cervix.CD4T.embed,
               conditions = factor(cervix.CD4T.integrated.SCE.DE$condition),
@@ -139,12 +145,12 @@ saveRDS(sls.model.CD4, "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTrans
 mean(rowData(sls.model.CD4)$tradeSeq$converged)
 
 ## Condition Test
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 condRes <- conditionTest(sls.model.CD4, l2fc = log2(2))
 condRes$padj <- p.adjust(condRes$pvalue, "fdr")
-saveRDS(condRes, "cervix_CD4lineage_condTest.RDS")
+saveRDS(condRes, "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/cervix_CD4lineage_condTest.RDS")
 
-condRes <- readRDS("cervix_CD4lineage_condTest.RDS")
+# Input saved earlier in this script; run the preceding steps first.
+condRes <- readRDS("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/cervix_CD4lineage_condTest.RDS")
 
 condRes <- condRes %>% filter(padj < 0.05) %>% arrange(padj)
 
@@ -175,9 +181,9 @@ infected.DE.Traj.cluster.df.output <- left_join(infected.DE.Traj.cluster.df,
                                                 condRes %>% mutate(gene = rownames(condRes)),
                                                 by = "gene")
 
-saveRDS(infected.DE.Traj.cluster.df.output, "infected_DE_Traj_cluster.RDS")
+saveRDS(infected.DE.Traj.cluster.df.output, "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/infected_DE_Traj_cluster.RDS")
 
-write.csv(infected.DE.Traj.cluster.df.output, "cervix_CD4_infected_DE_Traj_cluster_output.csv")
+write.csv(infected.DE.Traj.cluster.df.output, "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD4T_analysis/Cervix_CD4T_trajectory/Cervix_CD4T_PCA_THelper/cervix_CD4_infected_DE_Traj_cluster_output.csv")
 
 all.equal(names(infected.DE.Traj.cluster), rownames(yhatSmooth2Scaled))
 

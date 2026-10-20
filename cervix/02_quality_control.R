@@ -1,4 +1,8 @@
 # quality control
+# Supplementary Table 1: generates cervical QC summaries; clinical characteristics are added separately.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -7,6 +11,7 @@ library(scCustomize)
 library(table1)
 packageVersion("Seurat")
 # Load data
+# Run cervix/01_read_10x.R first; it generates this input file.
 cervix.all <- readRDS(file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all.RDS")
 
 cervix.all
@@ -35,7 +40,7 @@ sample.info.prior.filter <- cervix.all@meta.data %>% as.data.frame() %>%
             Median_GeneExpressed = median(nFeature_RNA),
             Mean_GeneExpressed = mean(nFeature_RNA))
 
-xlsx::write.xlsx(sample.info.prior.filter, file = "sample_info_prior_filter.xlsx", sheetName = "Sheet1",
+xlsx::write.xlsx(sample.info.prior.filter, file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/sample_info_prior_filter.xlsx", sheetName = "Sheet1",
   col.names = TRUE,  append = FALSE)
 
 # Seurat processing
@@ -91,7 +96,8 @@ sample.info.after.filter <- cervix.all@meta.data %>% as.data.frame() %>%
             Median_GeneExpressed = median(nFeature_RNA),
             Mean_GeneExpressed = mean(nFeature_RNA))
 
-xlsx::write.xlsx(sample.info.after.filter, file = "sample_info_after_filter.xlsx", sheetName = "Sheet1",
+# Supplementary Table 1: QC summaries only; clinical characteristics require the author-supplied table.
+xlsx::write.xlsx(sample.info.after.filter, file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/sample_info_after_filter.xlsx", sheetName = "Sheet1",
   col.names = TRUE,  append = FALSE)
 ### Filter samples
 cervix.all <- cervix.all[, !cervix.all$ID %in% c("3027", "3038", 

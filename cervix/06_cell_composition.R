@@ -1,5 +1,8 @@
 # cell composition
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_enrichment_analysis/Cervix_major_celltypes", recursive = TRUE, showWarnings = FALSE)
+
 library(Seurat)
 library(ggplot2)
 library(dplyr)
@@ -12,6 +15,7 @@ library(cowplot)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run cervix/05_annotate_major_cell_types.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 cervix.integrated$major_celltypes[which(cervix.integrated$major_celltypes %in% c("CD14_Mono", "CD16_Mono"))] <- "Monocytes"
@@ -59,7 +63,7 @@ Chi2_12celltypes <- Chi2_12celltypes %>% select(cell_type, InCluster_infected,
 
 Chi2_12celltypes
 
-write.csv(Chi2_12celltypes, file = "Cervix_INFvsUNINF_12celltypes_Chi2Enrich.csv")
+write.csv(Chi2_12celltypes, file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_enrichment_analysis/Cervix_major_celltypes/Cervix_INFvsUNINF_12celltypes_Chi2Enrich.csv")
 
 ## Proporiton INF vs UNINF within each cell type visualization
 inf_byCelltype_plot <- Chi2_12celltypes %>%

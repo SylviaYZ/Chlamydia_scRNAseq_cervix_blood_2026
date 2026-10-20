@@ -1,6 +1,9 @@
 # subtype reactome
+# Supplementary Table 7: exports cervical CD8 subtype REACTOME pathway results.
 
-for (folder in c("ALL_INFvsUNINF/")) dir.create(folder, recursive = TRUE, showWarnings = FALSE)
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_DE_INFvsUNINF/Reactome_pathway", recursive = TRUE, showWarnings = FALSE)
+
 
 library(dplyr)
 library(ggplot2)
@@ -14,6 +17,7 @@ library(enrichplot)
 library(org.Hs.eg.db)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 DefaultAssay(object = cervix.CD8T.integrated) <- "SCT"
@@ -23,7 +27,8 @@ celltypes <- c("Central memory CD8 T cells", "Effector memory CD8 T cells", "Ter
 
 for (ct in celltypes){
   print(ct)
-  All.DE <- read.csv(paste0("ALL_INFvsUNINF/",ct,"_INFvsUNINF_All_Wilcox.csv"))
+  # Run cervix/CD8/05_subtype_DE.R first; it generates this input file.
+  All.DE <- read.csv(paste0("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_DE_INFvsUNINF/ALL_INFvsUNINF/",ct,"_INFvsUNINF_All_Wilcox.csv"))
 
   All.DE <-  All.DE  %>%
     filter(p_val_adj < 0.05)
@@ -41,9 +46,9 @@ for (ct in celltypes){
 
   output.df <- as.data.frame(enrichedP@result) %>% dplyr::select(ID, Description,GeneRatio,BgRatio, p.adjust,geneID) %>% mutate(geneID_upFC = "", geneID_downFC="", geneID_alphabet = "")
 
-  for (row_i in 1:nrow(output.df)){
+  for (row_i in seq_len(nrow(output.df))){
     genes_i <- unlist(strsplit(output.df$geneID[row_i], split = "/"))
-    gene_i_log2FC <- All.DE$avg_log2FC[which(All.DE$X %in% genes_i)]
+    gene_i_log2FC <- All.DE$avg_log2FC[match(genes_i, All.DE$X)]
     names(gene_i_log2FC) <- genes_i
 
     # Separate into up-regulated and down-regulated genes
@@ -59,6 +64,7 @@ for (ct in celltypes){
     output.df[row_i, "geneID_alphabet"] <- paste(sort(genes_i),collapse="/")
   }
 
+    # Supplementary Table 7: CD8 subtype REACTOME pathway results.
     xlsx::write.xlsx(output.df %>% dplyr::select(-c(geneID))  ,
             file = paste0("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_DE_INFvsUNINF/Reactome_pathway/",ct,"_Reactome_All_DE.xlsx"))
 
@@ -69,7 +75,7 @@ for (ct in celltypes){
     dotplot(enrichedP, showCategory=20, x = "GeneRatio") + ggtitle(paste0("REACTOME for ",ct))
   )
 
-    print( cnetplot(enrichedP, foldChange=All.DE[na.omit(match(All.DE$X, enrichedP@gene2Symbol)), "avg_log2FC"]) + ggtitle(paste0("REACTOME for ",ct)))
+    print( cnetplot(enrichedP, foldChange=setNames(All.DE$avg_log2FC, All.DE$X)) + ggtitle(paste0("REACTOME for ",ct)))
 
    enrichedP <- pairwise_termsim(enrichedP)
 

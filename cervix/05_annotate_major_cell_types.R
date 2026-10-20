@@ -1,4 +1,8 @@
 # annotate major cell types
+# Supplementary Table 2: defines the cervical annotation marker lists; the table is curated separately.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -8,6 +12,7 @@ library(table1)
 packageVersion("Seurat")
 # Load data
 
+# Run cervix/03_normalize_integrate_cluster.R first; it generates this input file.
 cervix.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_all_filtered_normalized_integrated_clustered_prepMarker.RDS")
 
 DefaultAssay(object = cervix.integrated) <- "SCT"
@@ -16,6 +21,7 @@ DimPlot(cervix.integrated, reduction = "umap", group.by ="integrated_snn_res.1.8
 
 DimPlot(cervix.integrated, reduction = "umap", group.by ="integrated_snn_res.2", label = TRUE)
 # Define major cell type markers
+# Supplementary Table 2: curated marker genes used for annotation are defined below.
 T.cells <- c("CD3D", "CD3E", "CD3G", "CD27", "TRAC", "TRBC1")
 CD4.CD8.T <- c("SELL","CD4", "LDHB", "IL7R", "CD8A", "CD8B")
 CD4.Treg1 <- c("IL7R", "IL2RA",  "IL2RB","FOXP3", "SATB1", "LGALS3")
@@ -56,7 +62,6 @@ FeaturePlot(object = cervix.integrated, features = B.plasma)
 FeaturePlot(object = cervix.integrated, features = Plasma)
 FeaturePlot(object = cervix.integrated, features = Plasma2)
 ## B/plasma cells
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 FeaturePlot(object = cervix.integrated, features = B.plasma)
 
 # CD14+ and CD16+ Myeloid cells

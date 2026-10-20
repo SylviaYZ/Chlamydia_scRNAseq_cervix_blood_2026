@@ -9,6 +9,7 @@ library(SingleR)
 
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD4/01_subset_normalize_integrate.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker.RDS")
 
 # Check Number of DE genes

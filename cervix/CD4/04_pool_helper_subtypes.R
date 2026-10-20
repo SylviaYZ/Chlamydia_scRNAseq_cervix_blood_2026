@@ -1,5 +1,8 @@
 # pool helper subtypes
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -8,6 +11,7 @@ library(table1)
 library(SingleR)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD4/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD4T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD4T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 DefaultAssay(object = cervix.CD4T.integrated) <- "SCT"

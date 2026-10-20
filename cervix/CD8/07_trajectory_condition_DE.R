@@ -1,4 +1,9 @@
 # trajectory condition DE
+# Supplementary Table 8: generates trajectory DE and gene-module results; cervix/CD8/08_export_trajectory_gene_table.R exports the tables.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR", recursive = TRUE, showWarnings = FALSE)
 
 library(Seurat)
 library(ggplot2)
@@ -15,6 +20,7 @@ library(tidyr)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run cervix/CD8/03_SingleR_annotation.R first; it generates this input file.
 cervix.CD8T.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8T_normalized_integrated_clustered_prepMarker_SingleR.RDS")
 
 DefaultAssay(object = cervix.CD8T.integrated) <- "SCT"
@@ -83,6 +89,7 @@ plot(Trajectory.annotation)
 # DE analysis using TradeSeq
 ## Remove MT and RB genes, and AC genes
 
+# Run cervix/07_differential_expression.R first; it generates this input file.
 genes.remove <- readRDS(file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Gene_Remove_DE.rds")
 
 # Remove long integrative non-coding genes
@@ -90,14 +97,12 @@ cervix.CD8T.integrated.SCE.DE <- cervix.CD8T.integrated.SCE[!rownames(cervix.CD8
 
 cervix.CD8T.integrated.SCE.DE
 ## select knots for model
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 set.seed(425)
 
 knots <- evaluateK(counts = assays(cervix.CD8T.integrated.SCE.DE)$counts, sds = cervix.CD8T.embed, k = 3:10,
                    nGenes = 500, verbose = T)
 
 ## Fit the model
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 set.seed(425)
 sls.model.CD8 <- fitGAM(counts = assays(cervix.CD8T.integrated.SCE.DE)$counts, sds = cervix.CD8T.embed,
               conditions = factor(cervix.CD8T.integrated.SCE.DE$condition),
@@ -107,14 +112,15 @@ saveRDS(sls.model.CD8, "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTrans
 
 mean(rowData(sls.model.CD8)$tradeSeq$converged)
 
+# Input saved earlier in this script; run the preceding steps first.
 sls.model.CD8 <- readRDS(file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/Cervix/SCTransformV2_Oct26/cervix_CD8_slingshot_tradeSeq_model.RDS")
 ## Condition Test
-# Original notebook chunk used eval=FALSE; active here to compute the required result.
 condRes <- conditionTest(sls.model.CD8, l2fc = log2(2))
 condRes$padj <- p.adjust(condRes$pvalue, "fdr")
-saveRDS(condRes, "cervix_CD8lineage_condTest.RDS")
+saveRDS(condRes, "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR/cervix_CD8lineage_condTest.RDS")
 
-condRes <- readRDS("cervix_CD8lineage_condTest.RDS")
+# Input saved earlier in this script; run the preceding steps first.
+condRes <- readRDS("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR/cervix_CD8lineage_condTest.RDS")
 
 condRes <- condRes %>% filter(padj < 0.05) %>% arrange(padj)
 
@@ -141,7 +147,7 @@ infected.DE.Traj.cluster <- cutree(heatSmooth2_infected_row.clusters, k=5)
 infected.DE.Traj.cluster.df <- data.frame(gene = names(infected.DE.Traj.cluster),
                                           cluster = infected.DE.Traj.cluster)
 
-saveRDS(infected.DE.Traj.cluster.df, "infected_DE_Traj_cluster.RDS")
+saveRDS(infected.DE.Traj.cluster.df, "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Cervix/Cervix_CD8T_Analysis/Cervix_CD8T_trajectory/Cervix_CD8T_trajectory_SingleR/infected_DE_Traj_cluster.RDS")
 
 all.equal(names(infected.DE.Traj.cluster), rownames(yhatSmooth2Scaled))
 
