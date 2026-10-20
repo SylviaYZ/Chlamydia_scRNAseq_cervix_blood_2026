@@ -11,6 +11,8 @@ R scripts for single-cell RNA-seq analysis of cervical immune cells and circulat
 - **`figures/`** — Code for manuscript and supplementary figures.
 - **`data/`** — Cytokine values used in Figure 5 (`cytokines_range_adjusted_public.csv`), Chlamydia burden data used in Figure 9 (`BurdenforscRNA.xlsx`), and the original STRING network SVG exports.
 
+STRING network analysis was performed on the [STRING website](https://string-db.org/). Networks were exported as SVG files can be found under `data/`.
+
 Comments in the analysis scripts indicate which exported outputs correspond to Supplementary Tables 3–12. Supplementary Table 1 combines QC outputs with study metadata, and Supplementary Table 2 contains a curated marker list. The manuscript workbooks also include manual formatting.
 
 ## Usage
