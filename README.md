@@ -9,7 +9,7 @@ R scripts for single-cell RNA-seq analysis of cervical immune cells and circulat
 - **`cervix/CD4/`** — Cervical CD4 T-cell processing, normalization, integration, clustering, subtype annotation, composition, differential expression, pathway enrichment, and trajectory analysis.
 - **`blood/`** — Blood data processing, annotation, cell composition, and differential expression analysis.
 - **`figures/`** — Code for manuscript and supplementary figures.
-- **`data/`** — Cytokine values used in Figure 5 (`cytokines_range_adjusted_public.csv`), Chlamydia burden data used in Figure 9 (`BurdenforscRNA.xlsx`), and the original STRING network SVG exports.
+- **`data/`** — Cytokine values used in Figure 5 (`cytokines_range_adjusted_public.csv`), Chlamydia burden data used in Figure 9 (`BurdenforscRNA.xlsx`), and the STRING network SVG exports.
 
 STRING network analysis was performed on the [STRING website](https://string-db.org/). Networks were exported as SVG files can be found under `data/`.
 
