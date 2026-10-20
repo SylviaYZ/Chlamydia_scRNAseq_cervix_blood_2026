@@ -1,4 +1,8 @@
 # annotate major cell types
+# Supplementary Table 2: defines the blood annotation marker lists; the table is curated separately.
+
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -8,6 +12,7 @@ library(table1)
 packageVersion("Seurat")
 # Load data
 
+# Run blood/03_normalize_integrate_cluster.R first; it generates this input file.
 blood.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered_normalized_integrated_clustered_prepMarker.RDS")
 
 DefaultAssay(object = blood.integrated) <- "SCT"
@@ -15,6 +20,7 @@ DefaultAssay(object = blood.integrated) <- "SCT"
 DimPlot(blood.integrated, reduction = "umap", group.by ="integrated_snn_res.1.8", label = TRUE)
 
 DimPlot(blood.integrated, reduction = "umap", group.by ="integrated_snn_res.2", label = TRUE)
+# Supplementary Table 2: curated blood marker genes used for annotation.
 # Define major cell type markers
 T.cells <- c("CD3D", "CD3E", "CD3G", "CD27", "TRAC", "TRBC1")
 CD4.CD8.T <- c("SELL","CD4", "LDHB", "IL7R", "CD8A", "CD8B")

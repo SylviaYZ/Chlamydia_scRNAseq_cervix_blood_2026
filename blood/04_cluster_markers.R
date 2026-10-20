@@ -1,5 +1,8 @@
 # cluster markers
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Blood/Blood_check_major_clusters", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -7,6 +10,7 @@ library(scCustomize)
 library(table1)
 packageVersion("Seurat")
 # Load data
+# Run blood/03_normalize_integrate_cluster.R first; it generates this input file.
 blood.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered_normalized_integrated_clustered_prepMarker.RDS")
 
 # Check Number of DE genes

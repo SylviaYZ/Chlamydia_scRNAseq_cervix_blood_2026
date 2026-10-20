@@ -1,5 +1,8 @@
 # normalize integrate cluster
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26", recursive = TRUE, showWarnings = FALSE)
+
 library(dplyr)
 library(ggplot2)
 library(Seurat)
@@ -7,11 +10,12 @@ library(scCustomize)
 library(table1)
 packageVersion("Seurat")
 # Load filtered data
+# Run blood/02_quality_control.R first; it generates this input file.
 blood.all <- readRDS(file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered.RDS")
 # Normalization using SCTransform V2 and PCA
-## Load file for cell cycle
-exp.mat <- read.table(file = "/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/nestorawa_forcellcycle_expressionMatrix.txt",
-    header = TRUE, as.is = TRUE, row.names = 1)
+# Cell-cycle gene lists come from Seurat's built-in cc.genes object below.
+# The original nestorawa_forcellcycle_expressionMatrix.txt read was unused and has been removed.
+# That .txt file is not required to run this analysis and does not need to be uploaded.
 
 s.genes <- cc.genes$s.genes
 g2m.genes <- cc.genes$g2m.genes

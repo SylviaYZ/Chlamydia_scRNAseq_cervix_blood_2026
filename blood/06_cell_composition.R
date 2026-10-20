@@ -1,5 +1,8 @@
 # cell composition
 
+# Create output folders after updating the paths for your computer.
+dir.create("/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Blood/Blood_majorCT_enrichment_analysis", recursive = TRUE, showWarnings = FALSE)
+
 library(Seurat)
 library(ggplot2)
 library(dplyr)
@@ -12,6 +15,7 @@ library(cowplot)
 library(ggpubr)
 packageVersion("Seurat")
 # Load data
+# Run blood/05_annotate_major_cell_types.R first; it generates this input file.
 blood.integrated <- readRDS("/Chlamydia-SingleCell/CR 6.1.2 Reanalysis/PBMC/SCTransformV2_Oct26/blood_all_filtered_normalized_integrated_clustered_prepMarker_majorCT.RDS")
 
 blood.integrated$major_celltypes <- factor(blood.integrated$major_celltypes,
@@ -63,7 +67,7 @@ Chi2_12celltypes <- Chi2_12celltypes %>% select(cell_type, InCluster_infected,
 
 Chi2_12celltypes
 
-write.csv(Chi2_12celltypes, file = "Blood_INFvsUNINF_4celltypes_Chi2Enrich.csv")
+write.csv(Chi2_12celltypes, file = "/Chlamydia-SingleCell/SCTransformV2 Oct26 2023/Blood/Blood_majorCT_enrichment_analysis/Blood_INFvsUNINF_4celltypes_Chi2Enrich.csv")
 
 ## Proporiton INF vs UNINF within each cell type visualization
 inf_byCelltype_plot <- Chi2_12celltypes %>%
